@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "login": "node src",
     "registerCommands": "node scripts/registerCommands.js"
   },
   "keywords": [],
