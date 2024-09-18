@@ -5,7 +5,8 @@ const CommandFiles = [
 const Commands = {}
 
 CommandFiles.forEach((commandData) => {
-	Commands[commandData] = commandData.command.toJSON()
+	commandData.JSON = commandData.command.toJSON()
+	Commands[commandData.command.name] = commandData
 })
 
 module.exports = Commands

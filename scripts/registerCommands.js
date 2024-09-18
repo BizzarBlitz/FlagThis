@@ -45,7 +45,7 @@ async function registerCommands(commands, guildId) {
 
 
 Object.values(Commands).forEach(command => {
-	CommandList.push(command)
+	CommandList.push(command.JSON)
 })
 
 registerCommands(CommandList) // Register for all servers

@@ -7,10 +7,8 @@ module.exports = {
 		.setName("Flag/Unflag message")
 		.setType(DiscordJS.ApplicationCommandType.Message),
 	
-	callback: async interaction => {
-		await interaction.reply({
-			content: "Dawg",
-			ephemeral: true,
-		})
-	}
+	callback: interaction => {
+		// [TODO] Flag/Unflag message
+		return "Message flagged"
+	},
 }
