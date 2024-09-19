@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "login": "node src",
-    "registerCommands": "node scripts/registerCommands.js"
+    "login": "node src/index.mjs",
+    "registerCommands": "node scripts/registerCommands.mjs"
   },
   "keywords": [],
   "author": "",

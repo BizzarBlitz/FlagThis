@@ -1,17 +1,18 @@
 // @ts-check
 
-require("dotenv").config()
+import dotenv from "dotenv"
+dotenv.config()
 
-const Commands = require("./commands.js")
-const DiscordJs = require("discord.js")
+import Commands from "./commands.mjs"
+import DiscordJS from "discord.js"
 
 const TOKEN = process.env.TOKEN
 
-const Client = new DiscordJs.Client({ intents: [] })
+const Client = new DiscordJS.Client({intents: []})
 
 
 
-Client.on(DiscordJs.Events.InteractionCreate, async interaction => {
+Client.on(DiscordJS.Events.InteractionCreate, async interaction => {
 	if (!interaction.isCommand()) return
 
 	const commandData = Commands[interaction.commandName]

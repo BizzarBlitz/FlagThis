@@ -1,14 +1,15 @@
 // @ts-check
 
-const DiscordJS = require("discord.js")
+import DiscordJS from "discord.js"
+// import flags from "../flags.mjs"
 
-module.exports = {
+export default {
 	command: new DiscordJS.ContextMenuCommandBuilder()
 		.setName("Flag/Unflag message")
 		.setType(DiscordJS.ApplicationCommandType.Message),
 	
 	callback: interaction => {
-		// [TODO] Flag/Unflag message
+		console.log(interaction)
 		return "Message flagged"
 	},
 }

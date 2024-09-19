@@ -1,7 +1,8 @@
-require("dotenv").config()
+import dotenv from "dotenv"
+dotenv.config()
 
-const Commands = require("../src/commands.js")
-const { REST, Routes } = require("discord.js")
+import Commands from "../src/commands.mjs"
+import {REST, Routes} from "discord.js"
 
 const CLIENT_ID = process.env.CLIENT_ID
 const GUILD_ID = process.argv[2] || process.env.GUILD_ID
