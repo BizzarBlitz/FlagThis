@@ -1,6 +1,7 @@
 // @ts-check
 
 import Flag from "./classes/Flag.mjs"
+import * as Settings from "./settings.mjs"
 
 // Structure:
 //	{
@@ -12,8 +13,6 @@ import Flag from "./classes/Flag.mjs"
 //	}
 
 const Flags = {}
-
-const MAX_LIST_FLAGS = 0
 
 
 
@@ -42,10 +41,10 @@ function getOrCreateMessageFlags(flaggedMessages, messageId) {
 
 export function stringifyMessageFlags(messageFlags) {
 	const flagCount = messageFlags.length
-	let output = `### Total flags: ${flagCount}` + (flagCount > MAX_LIST_FLAGS ? ` (${MAX_LIST_FLAGS}/${flagCount} displayed)` : "")
+	let output = `### ${flagCount} flag${flagCount !== 1? "s" : ""} (${Math.min(flagCount, Settings.Constants.maxListFlags)} displayed)`
 
 	for (let index = 0; index < flagCount; index++) {
-		if (index === MAX_LIST_FLAGS) {
+		if (index === Settings.Constants.maxListFlags) {
 			output += `\n *${flagCount - index} more*`
 			break
 		}

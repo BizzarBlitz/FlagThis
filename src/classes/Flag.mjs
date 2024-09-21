@@ -1,6 +1,6 @@
 // @ts-check
 
-import settings from "../settings.mjs"
+import * as Settings from "../settings.mjs"
 
 export default class Flag {
 	onFlagAdded
@@ -8,7 +8,7 @@ export default class Flag {
 
 	constructor(userId, timestamp) {
 		this.timestamp = timestamp
-		this.timeoutId = setTimeout(this.remove, settings.flagLifespanHours)
+		this.timeoutId = setTimeout(this.remove, Settings.Configurable.flagLifespanHours)
 		this.userId = userId
 	}
 
