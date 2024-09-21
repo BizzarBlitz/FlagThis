@@ -1,7 +1,7 @@
 // @ts-check
 
 import DiscordJS from "discord.js"
-// import flags from "../flags.mjs"
+import * as flags from "../flags.mjs"
 
 export default {
 	command: new DiscordJS.ContextMenuCommandBuilder()
@@ -9,7 +9,15 @@ export default {
 		.setType(DiscordJS.ApplicationCommandType.Message),
 	
 	callback: interaction => {
-		console.log(interaction)
-		return "Message flagged"
+		const message = interaction.targetMessage
+		const user = interaction.user
+
+		if (!flags.hasFlagged(message, user)) {
+			flags.addFlag(message, user)
+			return "Message flagged for moderation"
+		} else {
+			flags.removeFlag(message, user)
+			return "Message unflagged"
+		}
 	},
 }

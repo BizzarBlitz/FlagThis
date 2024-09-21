@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 dotenv.config()
 
-import Commands from "../src/commands.mjs"
+import {Commands} from "../src/commands.mjs"
 import {REST, Routes} from "discord.js"
 
 const CLIENT_ID = process.env.CLIENT_ID

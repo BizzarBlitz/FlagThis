@@ -13,10 +13,12 @@ import Flag from "./classes/Flag.mjs"
 
 const Flags = {}
 
+const MAX_LIST_FLAGS = 0
+
 
 
 function getOrCreateAuthorFlaggedMessages(userId) {
-	let flaggedMessages = Flags[userId]
+	let flaggedMessages = getAuthorFlaggedMessages(userId)
 
 	if (!flaggedMessages) {
 		flaggedMessages = {}
@@ -37,6 +39,36 @@ function getOrCreateMessageFlags(flaggedMessages, messageId) {
 	return messageFlags
 }
 
+
+export function stringifyMessageFlags(messageFlags) {
+	const flagCount = messageFlags.length
+	let output = `### Total flags: ${flagCount}` + (flagCount > MAX_LIST_FLAGS ? ` (${MAX_LIST_FLAGS}/${flagCount} displayed)` : "")
+
+	for (let index = 0; index < flagCount; index++) {
+		if (index === MAX_LIST_FLAGS) {
+			output += `\n *${flagCount - index} more*`
+			break
+		}
+
+		const flag = messageFlags[index]
+		const newLine = `\n- <@${flag.userId}>`
+
+		output += newLine
+	}
+
+	return output
+}
+
+export function getAuthorFlaggedMessages(authorId) {
+	return Flags[authorId]
+}
+
+export function getMessageFlags(authorId, messageId) {
+	const authorFlaggedMessages = getAuthorFlaggedMessages(authorId)
+	if (!authorFlaggedMessages) return
+
+	return authorFlaggedMessages[messageId]
+}
 
 export function hasFlagged(message, user) {
 	const author = message.author
