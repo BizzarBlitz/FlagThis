@@ -11,12 +11,13 @@ export default {
 	callback: interaction => {
 		const message = interaction.targetMessage
 		const user = interaction.user
+		const existingFlag = flags.getExistingFlag(message, user)
 
-		if (!flags.hasFlagged(message, user)) {
+		if (!existingFlag) {
 			flags.addFlag(message, user)
 			return "Message flagged for moderation"
 		} else {
-			flags.removeFlag(message, user)
+			existingFlag.remove()
 			return "Message unflagged"
 		}
 	},

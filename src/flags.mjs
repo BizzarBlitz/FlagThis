@@ -5,11 +5,11 @@ import * as Settings from "./settings.mjs"
 
 // Structure:
 //	{
-//		[flaggedUserId]: {
+//		(flaggedUserId): [
 //			{
-//				[messageId]: [Flag]
+//				(messageId): [Flag]
 //			}
-//		}
+//		]
 //	}
 
 const Flags = {}
@@ -36,6 +36,16 @@ function getOrCreateMessageFlags(flaggedMessages, messageId) {
 	}
 
 	return messageFlags
+}
+
+function cleanFlags(authorId, flaggedMessages, messageId, messageFlags) {
+	if (messageFlags.length === 0) {
+		delete flaggedMessages[messageId]
+	}
+
+	if (Object.keys(flaggedMessages).length === 0) {
+		delete Flags[authorId]
+	}
 }
 
 
@@ -69,24 +79,20 @@ export function getMessageFlags(authorId, messageId) {
 	return authorFlaggedMessages[messageId]
 }
 
-export function hasFlagged(message, user) {
+export function getExistingFlag(message, user) {
 	const author = message.author
 
 	const flaggedMessages = Flags[author.id]
-	if (!flaggedMessages) return false
+	if (!flaggedMessages) return
 
 	const messageFlags = flaggedMessages[message.id]
-	if (!messageFlags) return false
-
-	for (const flag of messageFlags) {
-		if (flag.userId === user.id) return true
-	}
+	if (!messageFlags) return
 	
-	return false
+	return messageFlags.find(flag => flag.userId === user.id)
 }
 
 export function addFlag(message, user) {
-	if (hasFlagged(message, user)) {
+	if (getExistingFlag(message, user)) {
 		throw new Error(`User ${user.id} already flagged message ${message.id}`)
 	}
 
@@ -96,10 +102,18 @@ export function addFlag(message, user) {
 
 	const flag = new Flag(user.id, Math.floor(Date.now() / 1000))
 	messageFlags.push(flag)
+
+	flag.onRemoved = () => {
+		removeFlag(message, user)
+	}
+
+	console.log("Flag added. Current flags:", Flags)
 }
 
 export function removeFlag(message, user) {
-	if (!hasFlagged(message, user)) {
+	const existingFlag = getExistingFlag(message, user)
+
+	if (!existingFlag) {
 		throw new Error(`User ${user.id} has not flagged message ${message.id}`)
 	}
 
@@ -107,10 +121,8 @@ export function removeFlag(message, user) {
 	const flaggedMessages = getOrCreateAuthorFlaggedMessages(author.id)
 	const messageFlags = getOrCreateMessageFlags(flaggedMessages, message.id)
 
-	messageFlags.forEach((flag, index) => {
-		if (flag.userId === user.id) {
-			messageFlags.splice(index, 1)
-			return
-		}
-	})
+	messageFlags.splice(messageFlags.findIndex(flag => flag.userId === user.id), 1)
+	cleanFlags(message.author.id, flaggedMessages, message.id, messageFlags)
+
+	console.log("Flag removed. Current flags:", Flags)
 }
