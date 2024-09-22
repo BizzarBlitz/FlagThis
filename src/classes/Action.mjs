@@ -4,19 +4,25 @@ import Constants from "../constants.mjs"
 import DiscordJS from "discord.js"
 
 
-function createLogMessageCreateOptions(title, flagCount, messageUrl, actionId, color) {
-	return {embeds: new DiscordJS.EmbedBuilder()
+function createLogMessageCreateOptions(title, flagCount, messageUrl, authorId, actionId, color) {
+	return {embeds: [new DiscordJS.EmbedBuilder()
 		.setTitle(title)
 		.setDescription(`Message had ${flagCount} flags`)
-		.setFields({
-			name: "Flagged message Link",
-			value: messageUrl,
-		})
+		.setFields([
+			{
+				name: "Flagged message link",
+				value: messageUrl,
+			},
+			{
+				name: "Message author",
+				value: `<@${authorId}>`,
+			}
+		])
 		.setFooter({
 			text: `Action ID: ${actionId}`,
 		})
 		.setColor(color)
-	}
+	]}
 }
 
 
@@ -45,7 +51,6 @@ export class Action {
 		throw new Error("Action.toListItem() not defined")
 	}
 
-	// Note: Inheritants should have the flagged message as the parameter
 	log(message, messageFlags) {
 		throw new Error("Action.log() not defined")
 	}
@@ -73,9 +78,10 @@ export class BanAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User <@${message.author.id}> was banned`,
+			`User @${message.author.username} was banned`,
 			messageFlags.length,
 			message.url,
+			message.author.id,
 			this.id,
 			Constants.Colors.BanLogEmbed
 		))
@@ -94,9 +100,10 @@ export class DeleteMessageAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`Message in <#${message.channel.id}> was deleted`,
+			`Message by @${message.author.username} in #${message.channel.name} was deleted`,
 			messageFlags.length,
 			"*Unavailable*",
+			message.author.id,
 			this.id,
 			Constants.Colors.MessageDeleteLogEmbed
 		))
@@ -115,9 +122,10 @@ export class KickAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User ${message.author.name} was kicked`,
+			`User @${message.author.username} was kicked`,
 			messageFlags.length,
 			message.url,
+			message.author.id,
 			this.id,
 			Constants.Colors.BanLog
 		))
@@ -125,7 +133,7 @@ export class KickAction extends Action {
 }
 
 export class LogAction extends Action {
-	trigger = this.log
+	trigger = () => {}
 
 	toListItem() {
 		return `**${this.flags} flags:** log to <#${this.logChannel.id}>`
@@ -133,9 +141,10 @@ export class LogAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`Message by <@${message.author.id}> was flagged`,
+			`Message by @${message.author.username} was flagged`,
 			messageFlags.length,
 			message.url,
+			message.author.id,
 			this.id,
 			Constants.Colors.KickLogEmbed
 		))
@@ -150,10 +159,17 @@ export class RoleAction extends Action {
 	}
 
 	trigger(message, messageFlags) {
-		message.author.roles.add(this.role, `${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
+		const messageAuthorMember = message.member
+		console.log(messageAuthorMember, message)
+		if (!messageAuthorMember) return
+
+		messageAuthorMember.roles.add(this.role, `${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
 		if (this.duration) {
 			setTimeout(() => {
-				message.author.roles.remove(this.role, `Temprole expired (automated action #${this.id})`)
+				const messageAuthorMember = message.member
+				if (!messageAuthorMember) return
+
+				messageAuthorMember.roles.remove(this.role, `Temprole expired (automated action #${this.id})`)
 			}, this.duration * 3600_000)
 		}
 	}
@@ -166,9 +182,11 @@ export class RoleAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User ${message.author.name} was banned`,
+			`User @${message.author.username} ` +
+				(message.member ? `was given the ${this.role.name} role` : `could not be given the ${this.role.name} role because they left the server`),
 			messageFlags.length,
 			message.url,
+			message.author.id,
 			this.id,
 			this.role.color
 		))
@@ -195,9 +213,10 @@ export class TimeoutAction extends Action {
 		const expirationTimestamp = new Date(Date.now() + this.millisecondDuration)
 
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User ${message.author.name} was timeouted for ${this.duration} hours. Timeout expires <t:${expirationTimestamp}:R> (<t:${expirationTimestamp}:F)`,
+			`User @${message.author.username} was timeouted for ${this.duration} hours. Timeout expires <t:${expirationTimestamp}:R> (<t:${expirationTimestamp}:F)`,
 			messageFlags.length,
 			message.url,
+			message.author.id,
 			this.id,
 			Constants.Colors.TimeoutLogEmbed
 		))

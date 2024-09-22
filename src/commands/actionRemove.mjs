@@ -29,7 +29,9 @@ export default {
 			return "No action exists with id " + actionId
 		}
 
-		return `Action #${actionId}) removed (${action.toListItem()})\n` +
+		actions.removeAction(actionId)
+
+		return `Action #${actionId} removed (${action.toListItem()})\n` +
 			"Use the command `/action list` to view all actions"
 	},
 }

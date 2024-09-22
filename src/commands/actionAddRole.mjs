@@ -37,7 +37,7 @@ export default {
 		const flags = interaction.options.getInteger("flags")
 		const logChannel = interaction.options.getChannel("log-channel")
 		const role = interaction.options.getRole("role")
-		const duration = interaction.options.getumber("duration")
+		const duration = interaction.options.getNumber("duration")
 
 		const actionId = actions.addAction(new RoleAction(flags, logChannel, role, duration))
 

@@ -13,5 +13,5 @@ export const Constants = {
 }
 
 export const Configurable = {
-	flagLifespanHours: 24,
+	messageFlaggableHours: 24, // How long before a message can no longer be flagged
 }

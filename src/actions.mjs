@@ -45,3 +45,15 @@ export function listActions() {
 export function getAction(id) {
 	return Actions[id - 1]
 }
+
+export function triggerActionsAtFlagMilestone(message, messageFlags) {
+	for (const action of Actions) {
+		if (action.flags !== messageFlags.length) continue
+
+		action.trigger(message, messageFlags)
+
+		if (action.logChannel) {
+			action.log(message, messageFlags)
+		}
+	}
+}
