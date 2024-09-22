@@ -1,6 +1,7 @@
 // @ts-check
 
 import DiscordJS from "discord.js"
+import * as Settings from "../settings.mjs"
 
 export default {
 	command: new DiscordJS.SlashCommandSubcommandBuilder()
@@ -23,6 +24,7 @@ export default {
 		.addChannelOption(new DiscordJS.SlashCommandChannelOption()
 			.setName("log-channel")
 			.setDescription("The channel to log the action to (omit for no logging)")
+			.addChannelTypes(Settings.Constants.logChannelTypes)
 		),
 
 	callback: interaction => {

@@ -1,6 +1,7 @@
 // @ts-check
 
 import DiscordJS from "discord.js"
+import * as Settings from "../settings.mjs"
 
 export default {
 	command: new DiscordJS.SlashCommandSubcommandBuilder()
@@ -15,6 +16,7 @@ export default {
 			.setName("channel")
 			.setDescription("The channel to log the message to")
 			.setRequired(true)
+			.addChannelTypes(Settings.Constants.logChannelTypes)
 		),
 
 	callback: interaction => {
