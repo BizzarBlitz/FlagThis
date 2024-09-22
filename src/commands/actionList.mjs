@@ -1,7 +1,7 @@
 // @ts-check
 
-import DiscordJS from "discord.js"
 import * as actions from "../actions.mjs"
+import DiscordJS from "discord.js"
 
 export default {
 	command: new DiscordJS.SlashCommandSubcommandBuilder()

@@ -1,5 +1,6 @@
 // @ts-check
 
+import * as actions from "../actions.mjs"
 import DiscordJS from "discord.js"
 import * as flags from "../flags.mjs"
 
@@ -21,8 +22,14 @@ export default {
 		),
 
 	callback: interaction => {
-		const messageFlags = flags.getMessageFlags(interaction.targetMessage.author.id, interaction.targetId)
+		const actionId = interaction.options.getInteger("id")
 
-		return messageFlags ? flags.stringifyMessageFlags(messageFlags) : "No message flags"
+		const action = actions.getAction(actionId)
+		if (!action) {
+			return "No action exists with id " + actionId
+		}
+
+		return `Action #${actionId}) removed (${action.toListItem()})\n` +
+			"Use the command `/action list` to view all actions"
 	},
 }

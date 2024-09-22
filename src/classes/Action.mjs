@@ -21,11 +21,20 @@ function createLogMessageCreateOptions(title, flagCount, messageUrl, actionId, c
 
 
 export class Action {
-	id = -1
+	id = 0
 
 	constructor(flags, logChannel) {
 		this.flags = flags
 		this.logChannel = logChannel
+	}
+
+	static getActionAddedMessage(actionName, actionId) {
+		if (actionId === 0) {
+			return "Maximum number of actions reached\nUse `/action list` to view current actions and `/action remove` to remove an action"
+		}
+
+		return `\`${actionName}\` action added (ID: ${actionId})\n` +
+			"Use the command `/action list` to view all actions"
 	}
 
 	trigger(message, messageFlags) {
@@ -58,8 +67,8 @@ export class BanAction extends Action {
 
 	toListItem() {
 		return `**${this.flags} flags:** ban`
-			+ this.deleteMessageHistory ? `; delete messages from last ${this.deleteMessageHistory} hrs` : ""
-				+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
+			+ (this.deleteMessageHistory ? `; delete messages from last ${this.deleteMessageHistory} hrs` : "")
+				+ (this.logChannel ? `; log to <#${this.logChannel.id}>` : "")
 	}
 
 	log(message, messageFlags) {
@@ -80,7 +89,7 @@ export class DeleteMessageAction extends Action {
 
 	toListItem() {
 		return `**${this.flags} flags:** delete message`
-			+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
+			+ (this.logChannel ? `; log to <#${this.logChannel.id}>` : "")
 	}
 
 	log(message, messageFlags) {
@@ -101,7 +110,7 @@ export class KickAction extends Action {
 
 	toListItem() {
 		return `**${this.flags} flags:** kick`
-			+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
+			+ (this.logChannel ? `; log to <#${this.logChannel.id}>` : "")
 	}
 
 	log(message, messageFlags) {
@@ -142,12 +151,17 @@ export class RoleAction extends Action {
 
 	trigger(message, messageFlags) {
 		message.author.roles.add(this.role, `${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
+		if (this.duration) {
+			setTimeout(() => {
+				message.author.roles.remove(this.role, `Temprole expired (automated action #${this.id})`)
+			}, this.duration * 3600_000)
+		}
 	}
 
 	toListItem() {
 		return `**${this.flags} flags:** give role <@&${this.role.id}>`
-			+ this.duration ? ` for ${this.duration} hrs` : ""
-				+ this.logChannel ? `; log to ${this.logChannel.name}` : ""
+			+ (this.duration ? ` for ${this.duration} hrs` : "")
+				+ (this.logChannel ? `; log to ${this.logChannel.name}` : "")
 	}
 
 	log(message, messageFlags) {
@@ -157,6 +171,35 @@ export class RoleAction extends Action {
 			message.url,
 			this.id,
 			this.role.color
+		))
+	}
+}
+
+export class TimeoutAction extends Action {
+	constructor(flags, logChannel, duration) {
+		super(flags, logChannel)
+		this.duration = duration
+		this.millisecondDuration = duration * 3600_000
+	}
+
+	trigger(message, messageFlags) {
+		message.author.timeout(`${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
+	}
+
+	toListItem() {
+		return `**${this.flags} flags:** timeout for ${this.duration} hrs`
+			+ (this.logChannel ? `; log to ${this.logChannel.name}` : "")
+	}
+
+	log(message, messageFlags) {
+		const expirationTimestamp = new Date(Date.now() + this.millisecondDuration)
+
+		this.logChannel.send(createLogMessageCreateOptions(
+			`User ${message.author.name} was timeouted for ${this.duration} hours. Timeout expires <t:${expirationTimestamp}:R> (<t:${expirationTimestamp}:F)`,
+			messageFlags.length,
+			message.url,
+			this.id,
+			Constants.Colors.TimeoutLogEmbed
 		))
 	}
 }

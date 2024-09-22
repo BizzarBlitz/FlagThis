@@ -1,5 +1,7 @@
 // @ts-check
 
+import * as actions from "../actions.mjs"
+import {KickAction} from "../classes/Action.mjs"
 import DiscordJS from "discord.js"
 import * as Settings from "../settings.mjs"
 
@@ -11,16 +13,21 @@ export default {
 			.setName("flags")
 			.setDescription("The number of flags required to trigger this action")
 			.setRequired(true)
+			.setMinValue(1)
 		)
 		.addChannelOption(new DiscordJS.SlashCommandChannelOption()
 			.setName("log-channel")
 			.setDescription("The channel to log the action to (omit for no logging)")
+			// @ts-ignore
 			.addChannelTypes(Settings.Constants.logChannelTypes)
 		),
 
 	callback: interaction => {
-		const user = interaction.user
+		const flags = interaction.options.getInteger("flags")
+		const logChannel = interaction.options.getChannel("log-channel")
 
-		return "action add kick"
+		const actionId = actions.addAction(new KickAction(flags, logChannel))
+
+		return KickAction.getActionAddedMessage("kick", actionId)
 	},
 }

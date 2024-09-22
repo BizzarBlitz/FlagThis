@@ -12,13 +12,19 @@ function reassignActionIds() {
 	})
 
 	Actions.forEach((action, index) => {
-		action.id = index
+		action.id = index + 1
 	})
 }
 
 export function addAction(action) {
+	if (Actions.length === Settings.Constants.maxActions) {
+		return 0
+	}
+
 	Actions.push(action)
 	reassignActionIds()
+
+	return action.id
 }
 
 export function removeAction(id) {
@@ -34,4 +40,8 @@ export function listActions() {
 	})
 
 	return output === "" ? "*No actions to list*" : output
+}
+
+export function getAction(id) {
+	return Actions[id - 1]
 }

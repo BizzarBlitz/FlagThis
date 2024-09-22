@@ -1,5 +1,7 @@
 // @ts-check
 
+import * as actions from "../actions.mjs"
+import {RoleAction} from "../classes/Action.mjs"
 import DiscordJS from "discord.js"
 import * as Settings from "../settings.mjs"
 
@@ -11,6 +13,7 @@ export default {
 			.setName("flags")
 			.setDescription("The number of flags required to trigger this action")
 			.setRequired(true)
+			.setMinValue(1)
 		)
 		.addRoleOption(new DiscordJS.SlashCommandRoleOption()
 			.setName("role")
@@ -20,16 +23,24 @@ export default {
 		.addNumberOption(new DiscordJS.SlashCommandNumberOption()
 			.setName("duration")
 			.setDescription("How long before the role is removed, in hours (omit for permanent role)")
+			.setMinValue(0)
+			.setMaxValue(24 * 14) // What kind of psychopath adds a temprole for over 2 weeks
 		)
 		.addChannelOption(new DiscordJS.SlashCommandChannelOption()
 			.setName("log-channel")
 			.setDescription("The channel to log the action to (omit for no logging)")
+			// @ts-ignore
 			.addChannelTypes(Settings.Constants.logChannelTypes)
 		),
 
 	callback: interaction => {
-		const user = interaction.user
+		const flags = interaction.options.getInteger("flags")
+		const logChannel = interaction.options.getChannel("log-channel")
+		const role = interaction.options.getRole("role")
+		const duration = interaction.options.getumber("duration")
 
-		return "action add role"
+		const actionId = actions.addAction(new RoleAction(flags, logChannel, role, duration))
+
+		return RoleAction.getActionAddedMessage("role", actionId)
 	},
 }
