@@ -22,5 +22,16 @@ export function addAction(action) {
 }
 
 export function removeAction(id) {
-	// [TODO] Implement
+	Actions.splice(Actions.findIndex(action => action.id === id))
+	reassignActionIds()
+}
+
+export function listActions() {
+	let output = ""
+
+	Actions.forEach(action => {
+		output += `${action.id}. ${action.toListItem()}` + (action.id !== Actions.length ? "\n" : "")
+	})
+
+	return output === "" ? "*No actions to list*" : output
 }

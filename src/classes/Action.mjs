@@ -57,7 +57,7 @@ export class BanAction extends Action {
 	}
 
 	toListItem() {
-		return `**${this.flags}flags:** ban`
+		return `**${this.flags} flags:** ban`
 			+ this.deleteMessageHistory ? `; delete messages from last ${this.deleteMessageHistory} hrs` : ""
 				+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
 	}
@@ -79,7 +79,7 @@ export class DeleteMessageAction extends Action {
 	}
 
 	toListItem() {
-		return `**${this.flags}flags:** delete message`
+		return `**${this.flags} flags:** delete message`
 			+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
 	}
 
@@ -100,7 +100,7 @@ export class KickAction extends Action {
 	}
 
 	toListItem() {
-		return `**${this.flags}flags:** kick`
+		return `**${this.flags} flags:** kick`
 			+ this.logChannel ? `; log to <#${this.logChannel.id}>` : ""
 	}
 
@@ -119,7 +119,7 @@ export class LogAction extends Action {
 	trigger = this.log
 
 	toListItem() {
-		return `**${this.flags}flags:** log to <#${this.logChannel.id}>`
+		return `**${this.flags} flags:** log to <#${this.logChannel.id}>`
 	}
 
 	log(message, messageFlags) {
@@ -145,7 +145,7 @@ export class RoleAction extends Action {
 	}
 
 	toListItem() {
-		return `**${this.flags}flags:** give role <@&${this.role.id}>`
+		return `**${this.flags} flags:** give role <@&${this.role.id}>`
 			+ this.duration ? ` for ${this.duration} hrs` : ""
 				+ this.logChannel ? `; log to ${this.logChannel.name}` : ""
 	}
