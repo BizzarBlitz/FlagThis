@@ -1,4 +1,4 @@
-import DiscordJS from "discord.js"
+import {ChannelType} from "discord.js"
 
 export const Constants = {
 	maxListFlags: 20,
