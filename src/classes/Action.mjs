@@ -25,6 +25,10 @@ function createLogMessageCreateOptions(title, flagCount, messageUrl, authorId, a
 	]}
 }
 
+async function getMessageMember(message) {
+	return message.member || await message.guild.members.fetch(message.author.id)
+}
+
 
 export class Action {
 	id = 0
@@ -111,8 +115,11 @@ export class DeleteMessageAction extends Action {
 }
 
 export class KickAction extends Action {
-	trigger(message, messageFlags) {
-		message.author.kick(`${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
+	async trigger(message, messageFlags) {
+		const messageAuthorMember = await getMessageMember(message)
+		if (!messageAuthorMember?.kickable) return
+
+		messageAuthorMember.kick(`${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
 	}
 
 	toListItem() {
@@ -120,14 +127,18 @@ export class KickAction extends Action {
 			+ (this.logChannel ? `; log to <#${this.logChannel.id}>` : "")
 	}
 
-	log(message, messageFlags) {
+	async log(message, messageFlags) {
+		const messageAuthorMember = await getMessageMember(message)
+
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User @${message.author.username} was kicked`,
+			`User @${message.author.username}` + (messageAuthorMember.kickable
+				? "was kicked"
+				: "could not be kicked"),
 			messageFlags.length,
 			message.url,
 			message.author.id,
 			this.id,
-			Constants.Colors.BanLog
+			Constants.Colors.KickLogEmbed
 		))
 	}
 }
@@ -141,12 +152,12 @@ export class LogAction extends Action {
 
 	log(message, messageFlags) {
 		this.logChannel.send(createLogMessageCreateOptions(
-			`Message by @${message.author.username} was flagged`,
+			`Message by @${message.author.username} in #${message.channel.name} was flagged`,
 			messageFlags.length,
 			message.url,
 			message.author.id,
 			this.id,
-			Constants.Colors.KickLogEmbed
+			Constants.Colors.MessageLogEmbed
 		))
 	}
 }
@@ -159,14 +170,14 @@ export class RoleAction extends Action {
 	}
 
 	async trigger(message, messageFlags) {
-		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+		const messageAuthorMember = await getMessageMember(message)
 		if (!messageAuthorMember) return
 
 		messageAuthorMember.roles.add(this.role, `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
 		
 		if (this.duration) {
 			setTimeout(async () => {
-				const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+				const messageAuthorMember = await getMessageMember(message)
 				if (!messageAuthorMember) return
 
 				messageAuthorMember.roles.remove(this.role, `Temprole expired (automated action #${this.id})`)
@@ -181,7 +192,7 @@ export class RoleAction extends Action {
 	}
 
 	async log(message, messageFlags) {
-		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+		const messageAuthorMember = await getMessageMember(message)
 
 		this.logChannel.send(createLogMessageCreateOptions(
 			`User @${message.author.username} ` +
@@ -203,7 +214,7 @@ export class TimeoutAction extends Action {
 	}
 
 	async trigger(message, messageFlags) {
-		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+		const messageAuthorMember = await getMessageMember(message)
 		if (!messageAuthorMember?.moderatable) return
 
 		messageAuthorMember.timeout(this.millisecondDuration, `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
@@ -216,7 +227,7 @@ export class TimeoutAction extends Action {
 
 	async log(message, messageFlags) {
 		const expirationTimestamp = new Date(Date.now() + this.millisecondDuration)
-		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+		const messageAuthorMember = await getMessageMember(message)
 
 		this.logChannel.send(createLogMessageCreateOptions(
 			`User @${message.author.username} ` + (messageAuthorMember?.moderatable
