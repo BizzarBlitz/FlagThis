@@ -165,8 +165,8 @@ export class RoleAction extends Action {
 		messageAuthorMember.roles.add(this.role, `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
 		
 		if (this.duration) {
-			setTimeout(() => {
-				const messageAuthorMember = message.member
+			setTimeout(async () => {
+				const messageAuthorMember = await message.guild.members.fetch(message.author.id)
 				if (!messageAuthorMember) return
 
 				messageAuthorMember.roles.remove(this.role, `Temprole expired (automated action #${this.id})`)
@@ -180,10 +180,12 @@ export class RoleAction extends Action {
 				+ (this.logChannel ? `; log to ${this.logChannel.name}` : "")
 	}
 
-	log(message, messageFlags) {
+	async log(message, messageFlags) {
+		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+
 		this.logChannel.send(createLogMessageCreateOptions(
 			`User @${message.author.username} ` +
-				(message.member ? `was given the ${this.role.name} role` : `could not be given the ${this.role.name} role because they left the server`),
+				(messageAuthorMember ? `was given the ${this.role.name} role` : `could not be given the ${this.role.name} role`),
 			messageFlags.length,
 			message.url,
 			message.author.id,
@@ -200,20 +202,26 @@ export class TimeoutAction extends Action {
 		this.millisecondDuration = duration * 3600_000
 	}
 
-	trigger(message, messageFlags) {
-		message.author.timeout(`${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
-	}
+	async trigger(message, messageFlags) {
+		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
+		if (!messageAuthorMember?.moderatable) return
+
+		messageAuthorMember.timeout(this.millisecondDuration, `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
+	}m
 
 	toListItem() {
 		return `**${this.flags} flags:** timeout for ${this.duration} hrs`
 			+ (this.logChannel ? `; log to ${this.logChannel.name}` : "")
 	}
 
-	log(message, messageFlags) {
+	async log(message, messageFlags) {
 		const expirationTimestamp = new Date(Date.now() + this.millisecondDuration)
+		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
 
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User @${message.author.username} was timeouted for ${this.duration} hours. Timeout expires <t:${expirationTimestamp}:R> (<t:${expirationTimestamp}:F)`,
+			`User @${message.author.username} ` + (messageAuthorMember?.moderatable
+				? `was timeouted for ${this.duration} hours. Timeout expires ${expirationTimestamp}`
+				: "could not be timeouted"),
 			messageFlags.length,
 			message.url,
 			message.author.id,

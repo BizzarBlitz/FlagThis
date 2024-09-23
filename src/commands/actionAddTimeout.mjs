@@ -18,6 +18,7 @@ export default {
 		.addNumberOption(new DiscordJS.SlashCommandNumberOption()
 			.setName("duration")
 			.setDescription("How long the timeout should last, in hours")
+			.setRequired(true)
 			.setMinValue(0)
 			.setMaxValue(24 * 28) // Max timeout duration
 		)
