@@ -12,6 +12,10 @@ export default {
 	callback: interaction => {
 		const message = interaction.targetMessage
 
+		if (message.author.bot) {
+			return "Cannot flag bot messages"
+		}
+
 		if (Date.now() - message.createdTimestamp > Settings.Configurable.messageFlaggableHours * 3600_000) {
 			return `Cannot flag messages ${Settings.Configurable.messageFlaggableHours} hours past their creation`
 		}

@@ -39,6 +39,18 @@ export default {
 		const role = interaction.options.getRole("role")
 		const duration = interaction.options.getNumber("duration")
 
+		if (role.name === "@everyone") { // No Patrick, you cannot give the @everyone role to someone
+			return "Cannot give the `@everyone` role to users\n-# Obviously"
+		}
+
+		if (role.managed) {
+			return "Cannot give users managed (bot) roles"
+		}
+
+		if (role.comparePositionTo(interaction.guild.roles.botRoleFor(interaction.client.user)) >= 0) {
+			return "Cannot give users roles higher than this bot's current role"
+		}
+
 		const actionId = actions.addAction(new RoleAction(flags, logChannel, role, duration))
 
 		return RoleAction.getActionAddedMessage("role", actionId)

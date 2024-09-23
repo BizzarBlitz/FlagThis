@@ -158,12 +158,12 @@ export class RoleAction extends Action {
 		this.duration = duration
 	}
 
-	trigger(message, messageFlags) {
-		const messageAuthorMember = message.member
-		console.log(messageAuthorMember, message)
+	async trigger(message, messageFlags) {
+		const messageAuthorMember = await message.guild.members.fetch(message.author.id)
 		if (!messageAuthorMember) return
 
-		messageAuthorMember.roles.add(this.role, `${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`)
+		messageAuthorMember.roles.add(this.role, `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`)
+		
 		if (this.duration) {
 			setTimeout(() => {
 				const messageAuthorMember = message.member

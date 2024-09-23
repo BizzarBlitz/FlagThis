@@ -8,7 +8,9 @@ import DiscordJS from "discord.js"
 
 const TOKEN = process.env.TOKEN
 
-const Client = new DiscordJS.Client({intents: []})
+const Client = new DiscordJS.Client({intents: [
+	DiscordJS.GatewayIntentBits.Guilds
+]})
 
 
 
