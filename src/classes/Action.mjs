@@ -67,9 +67,12 @@ export class BanAction extends Action {
 		this.deleteMessageHistory = deleteMessageHistory
 	}
 
-	trigger(message, messageFlags) {
-		message.author.ban({
-			reason: `${messageFlags.length} flags on message ${message.url} (automated action #${this.id})`,
+	async trigger(message, messageFlags) {
+		const messageAuthorMember = await getMessageMember(message)
+		if (!messageAuthorMember?.bannable) return
+
+		messageAuthorMember.ban({
+			reason: `${messageFlags.length} flags on message in #${message.channel.name} (automated action #${this.id})`,
 			deleteMessageSeconds: (this.deleteMessageHistory || 0) * 3600, // Hours to seconds conversion
 		})
 	}
@@ -80,9 +83,13 @@ export class BanAction extends Action {
 				+ (this.logChannel ? `; log to <#${this.logChannel.id}>` : "")
 	}
 
-	log(message, messageFlags) {
+	async log(message, messageFlags) {
+		const messageAuthorMember = await getMessageMember(message)
+
 		this.logChannel.send(createLogMessageCreateOptions(
-			`User @${message.author.username} was banned`,
+			`User @${message.author.username}` + (messageAuthorMember
+				? "was banned"
+				: "could not be banned"),
 			messageFlags.length,
 			message.url,
 			message.author.id,
