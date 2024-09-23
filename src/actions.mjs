@@ -28,7 +28,7 @@ export function addAction(action) {
 }
 
 export function removeAction(id) {
-	Actions.splice(Actions.findIndex(action => action.id === id))
+	Actions.splice(Actions.findIndex(action => action.id === id), 1)
 	reassignActionIds()
 }
 
